@@ -3,6 +3,7 @@ package com.adrianlukito.daggerhilt
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.scopes.ActivityScoped
 import javax.inject.Inject
@@ -11,7 +12,6 @@ import javax.inject.Singleton
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    // field injection
     @Inject
     lateinit var someClass: SomeClass
 
@@ -20,35 +20,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         println(someClass.doAThing())
-        println(someClass.doSomeOtherThing())
     }
 }
 
-@AndroidEntryPoint
-class MyFragment: Fragment() {
+//~1: constructor injection - The dependencies are provided through a client's class constructor.
+//
+//~2: constructor injection - Constructor Injection is the act of statically defining the list of required
+//Dependencies by specifying them as parameters to the class’s constructor.
 
-    @Inject
-    lateinit var someClass: SomeClass
-}
-
-// constructor injection
-@ActivityScoped
 class SomeClass @Inject constructor(
-    private val someOtherClass: SomeOtherClass
-) {
-
-    fun doAThing(): String {
-        return "Look I did a thing!"
-    }
-
-    fun doSomeOtherThing(): String {
-        return someOtherClass.doSomeOtherThing()
+    private val someDependency: SomeInterface, // compile time error, cannot do constructor injection when injected interface
+    private val gson: Gson // compile time error, something not own, such as thrid party library
+){
+    fun doAThing(): String{
+        return "Look I got: ${someDependency.getAThing()}"
     }
 }
 
-class SomeOtherClass @Inject constructor() {
-
-    fun doSomeOtherThing(): String {
-        return "Look I did some other thing!"
+class SomeDependency @Inject constructor() : SomeInterface {
+    override fun getAThing() : String {
+        return "A Thing"
     }
+}
+
+interface SomeInterface {
+
+    fun getAThing(): String
 }
